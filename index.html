@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="/js/jquery-1.11.3.min.js" charset="utf-8"></script>
+    <style>
+        body {background: #f2f2f2; color: #414141;}
+        .blog {width: 960px; margin : 50px auto 0; border: 1px solid #ccc; background: #fff;
+        padding: 20px;}
+
+        .blog h1 {text-align: center; padding-bottom: 20px; border-bottom: 1px solid #ccc;}
+        .blog li {border-bottom: 1px dotted #ddd;}
+        .page {text-align: center;}
+    </style>
+</head>
+<body>
+    <div class="blog">
+        <h1>博客列表 <small><script>document.write(new Date().toLocaleString())</script></small></h1>
+        <ul></ul>
+        <p class="page">
+            总共有 <span id="total"></span> 条记录，每页显示 <span id="pagesize"></span> 条，
+            当前是  <span id="page"></span>/<span id="pagenum"></span> 页
+            <a href="javascript:;" id="prev">上一页</a>
+            <a href="javascript:;" id="next">下一页</a>
+        </p>
+    </div>
+
+    <script>
+        //页面一载入，立即发一个ajax请求
+        var pagesize = 4;
+        var page = 1;
+        //ajax方式获取指定page的博客内容
+        function getBlogs(page){
+            $.ajax({
+                url : "/blog",
+                type : "get",
+                data : {page,pagesize},
+                dataType : 'json',
+                success : function(res){
+                    console.log(res);
+                    let str = "";
+                    res.blog.forEach(function(item){
+                        str += `<li>
+                                    <h2><a href="">${item.title}</a></h2>
+                                    <p>${item.time}</p>
+                                    <p>${item.summary}</p>
+                                </li>`;
+                    });
+                    $(".blog ul").html(str);
+                    $("#pagesize").text(pagesize);
+                    $("#total").text(res.total);
+                    $("#page").text(res.page);
+                    $("#pagenum").text(res.pagenum);
+                }
+            });
+        }
+
+        //第一次，先调用getBlosg获取第一页的内容
+        getBlogs(page);
+        //上一页的点击
+        $("#prev").on('click',function(){
+            if (page == 1) return;
+            getBlogs(--page);
+        });
+        //下一页的点击
+        $("#next").on('click',function(){
+            let pagenum = $("#pagenum").text();
+            if (page == pagenum ) return;
+            getBlogs(++page);
+        });
+    </script>
+</body>
+</html>
